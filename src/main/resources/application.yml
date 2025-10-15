@@ -14,6 +14,10 @@ spring:
             - Path=/api/orders/**
           filters:
             - StripPrefix=1
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@customerKeyResolver}"
+                rate-limiter: "#{@minuteRateLimiter}"
 
       default-filters:
         - name: DedupeResponseHeader
@@ -23,6 +27,12 @@ spring:
     discovery:
       locator:
         enabled: true
+        lower-case-service-id: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.data.redis: DEBUG
 
 eureka:
   client:
