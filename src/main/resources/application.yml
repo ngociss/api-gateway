@@ -1,9 +1,61 @@
+#server:
+#  port: 8080
+#
+#spring:
+#  application:
+#    name: api-gateway
+#
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: order-service
+#          uri: lb://order-service
+#          predicates:
+#            - Path=/api/order/**
+#        - id: auth-service
+#          uri: lb://auth-service
+#          predicates:
+#            - Path=/api/auth/**
+#
+#          filters:
+#            - StripPrefix=1
+#            - name: RequestRateLimiter
+#              args:
+#                key-resolver: "#{@customerKeyResolver}"
+#                rate-limiter: "#{@minuteRateLimiter}"
+#
+#      default-filters:
+#        - name: DedupeResponseHeader
+#          args:
+#            Access-Control-Allow-Origin: RETAIN_UNIQUE
+#
+#    discovery:
+#      locator:
+#        enabled: true
+#        lower-case-service-id: true
+#
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: DEBUG
+#    org.springframework.data.redis: DEBUG
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka
+
+
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
     name: api-gateway
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
 
   cloud:
     gateway:
@@ -18,6 +70,13 @@ spring:
               args:
                 key-resolver: "#{@customerKeyResolver}"
                 rate-limiter: "#{@minuteRateLimiter}"
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+            - name: RequestRateLimiter
 
       default-filters:
         - name: DedupeResponseHeader
@@ -37,4 +96,4 @@ logging:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
