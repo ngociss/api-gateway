@@ -66,17 +66,18 @@ spring:
             - Path=/api/orders/**
           filters:
             - StripPrefix=1
-            - name: RequestRateLimiter
-              args:
-                key-resolver: "#{@customerKeyResolver}"
-                rate-limiter: "#{@minuteRateLimiter}"
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=1
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
           filters:
             - StripPrefix=1
-            - name: RequestRateLimiter
 
       default-filters:
         - name: DedupeResponseHeader
@@ -97,3 +98,12 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
+
+jwt:
+  secret: ${JWT_SECRET:mySecretKeyForJWTAuthenticationThatShouldBeAtLeast256BitsLongForHS512Algorithm}
+  access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION:900000} # 15 minutes
+  refresh-token-expiration-ms: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000} # 7 days
+
+rate-limit:
+  requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:10} # 60 requests per minute per user
+  window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60} # 1 minute window
